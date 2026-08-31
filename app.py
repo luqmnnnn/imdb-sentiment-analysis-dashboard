@@ -171,6 +171,29 @@ st.markdown(
         font-family: 'Poppins', sans-serif !important;
     }
 
+    /* --- Slider floating value bubble + spacing (prevents overlap) --- */
+    .stSlider {
+        padding-top: 1.3rem !important;
+        padding-bottom: 0.4rem !important;
+    }
+    .stSlider [data-testid="stSliderThumbValue"] {
+        color: #5D4432 !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 0.85rem !important;
+    }
+    .stSlider [data-testid="stTickBar"],
+    .stSlider [data-testid="stTickBarMin"],
+    .stSlider [data-testid="stTickBarMax"] {
+        margin-top: 0.3rem !important;
+    }
+
+    /* --- Caption text (uses stCaptionContainer testid, not a .stCaption class) --- */
+    [data-testid="stCaptionContainer"] p {
+        color: #3E2B1E !important;
+        font-family: 'Poppins', sans-serif !important;
+    }
+
     /* =================================================================
        SIDEBAR — dark espresso + cream text
     ================================================================= */
@@ -219,6 +242,18 @@ st.markdown(
     section[data-testid="stSidebar"] .stSlider [data-testid="stTickBarMax"],
     section[data-testid="stSidebar"] .stSlider span {
         color: #E9E3DD !important;
+    }
+    section[data-testid="stSidebar"] .stSlider [data-testid="stSliderThumbValue"] {
+        color: #F9F7F5 !important;
+        font-weight: 700 !important;
+    }
+    /* Caption text was dark-on-dark and unreadable inside the sidebar.
+       Streamlit renders captions via [data-testid="stCaptionContainer"], not a .stCaption class. */
+    section[data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+    section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
+    section[data-testid="stSidebar"] small {
+        color: #C4A882 !important;
+        opacity: 0.95 !important;
     }
     section[data-testid="stSidebar"] [data-baseweb="input"] input {
         background-color: rgba(255,255,255,0.06) !important;
