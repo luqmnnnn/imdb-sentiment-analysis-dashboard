@@ -1,5 +1,7 @@
 # IMDB Sentiment Analysis Dashboard
 
+**Bachelor of Artificial Intelligence Technologies — Principles of Artificial Intelligence — Mini Project**
+
 Sentiment classification on the IMDB 50K movie review dataset, comparing classical TF-IDF models against a pretrained DistilBERT running zero-shot, plus a seven-way emotion classification extension. Includes both a research notebook and an interactive Streamlit dashboard.
 
 **Live demo:** https://imdb-sentiment-analysis-dashboard.streamlit.app/
