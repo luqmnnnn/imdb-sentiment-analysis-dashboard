@@ -1049,12 +1049,17 @@ elif page == "Conclusion":
 
     st.markdown("### Key Findings")
     st.markdown("""
-    1. **TF-IDF + SVM** is the strongest classical baseline, since `LinearSVC` scales with support vectors rather than raw dimensions and fits a linear boundary cleanly in high-dimensional sparse text.
-    2. **Random Forest** trails SVM by a small margin, averaging many trees over random feature subsets.
-    3. **AdaBoost** sits further back: its depth-1 stumps each look at a single term out of 5,000, so it stays underfit even after hundreds of rounds.
-    4. **KNN** is the weakest classical model, since distance between points stops being meaningful in a 5,000-dimensional sparse space.
-    5. **DistilBERT**, run zero-shot with no training on this dataset, outperforms every classical model, because self-attention lets it read "not" as modifying "good" instead of treating every word as independent.
-    6. **Emotion classification** (seven classes instead of two) is harder and more imbalanced, so macro-F1 and a majority baseline matter more than raw accuracy there.
+    1. **TF-IDF + SVM is the strongest classical baseline (85.25% accuracy).** Movie reviews turn into 5,000-dimensional sparse vectors after TF-IDF, and `LinearSVC` was built for exactly that shape of data: instead of working directly with all 5,000 dimensions, it scales with the number of support vectors, the handful of reviews that sit closest to the decision boundary. That keeps training fast and lets it draw a clean linear split between positive and negative reviews even in such high-dimensional space, which is why it consistently beats the other three classical models trained here.
+
+    2. **Random Forest is a close second (83.80% accuracy).** It builds many decision trees, each trained on a random subset of reviews and a random subset of TF-IDF terms, then lets every tree vote on the final label. Because each tree's mistakes tend to be uncorrelated with the others, averaging the votes smooths out a lot of individual error, landing just behind SVM but clearly ahead of the remaining two models.
+
+    3. **AdaBoost lags further behind (79.50% accuracy).** Where Random Forest trains many trees independently, AdaBoost trains a chain of extremely shallow trees (depth-1 "stumps") one after another, where each new stump is reweighted to focus on whatever the previous one got wrong. The problem here is that every stump only ever looks at a single TF-IDF term out of 5,000 at a time, so the model stays underfit (too simple to capture the pattern) even after hundreds of boosting rounds, which caps how high its accuracy can climb.
+
+    4. **KNN is the weakest classical model by a wide margin (71.45% accuracy).** KNN classifies a review by finding its nearest neighbors and copying their majority label, which only works when "distance" between two data points actually means something. In a 5,000-dimensional sparse space, almost every pair of reviews ends up roughly equally far apart from each other, so the notion of a "nearest" neighbor stops being reliable, which is the core reason KNN trails every other model tested.
+
+    5. **DistilBERT wins overall (89.20% accuracy) despite zero training on this dataset.** All four classical models above treat each word as an independent, unordered feature, which is why none of them can natively tell that "not good" and "good" mean opposite things. DistilBERT reads the full sentence through self-attention, so it can connect "not" to the word it modifies and understand word order and context the way TF-IDF fundamentally cannot, and it does this without ever seeing a single training example from this specific IMDB dataset.
+
+    6. **Emotion classification is a harder, more imbalanced problem than polarity classification.** Moving from two balanced classes (positive/negative) to seven emotion classes (anger, disgust, fear, joy, neutral, sadness, surprise) means the classes are no longer evenly distributed, some emotions show up far more often in movie reviews than others. Raw accuracy can look artificially high on an imbalanced dataset just by favoring the majority class, so this project reports macro-F1 and compares against a majority-class baseline alongside accuracy to get an honest read on performance.
     """)
 
     st.markdown("### Practical Takeaway")
