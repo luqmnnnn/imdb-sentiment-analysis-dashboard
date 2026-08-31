@@ -147,16 +147,34 @@ st.markdown(
         color: #5D4432 !important;
     }
 
-    [data-baseweb="input"] input,
-    [data-baseweb="textarea"] textarea {
+    [data-baseweb="input"] input {
         background-color: #ffffff !important;
         color: #3E2B1E !important;
         border: 1.5px solid #C4A882 !important;
         border-radius: 8px !important;
         font-family: 'Poppins', sans-serif !important;
     }
+
+    /* --- Text area (e.g. "Write a movie review") — dark background, white text --- */
+    [data-baseweb="textarea"] textarea,
+    .stTextArea textarea {
+        background-color: #3E2B1E !important;
+        color: #F9F7F5 !important;
+        border: 1.5px solid #C4A882 !important;
+        border-radius: 8px !important;
+        font-family: 'Poppins', sans-serif !important;
+        -webkit-text-fill-color: #F9F7F5 !important;
+        text-shadow: none !important;
+    }
+    [data-baseweb="textarea"] textarea::placeholder,
+    .stTextArea textarea::placeholder {
+        color: #C4A882 !important;
+        opacity: 1 !important;
+    }
+
     [data-baseweb="input"] input:focus,
-    [data-baseweb="textarea"] textarea:focus {
+    [data-baseweb="textarea"] textarea:focus,
+    .stTextArea textarea:focus {
         border-color: #5D4432 !important;
         box-shadow: 0 0 0 3px rgba(93,68,50,0.15) !important;
     }
