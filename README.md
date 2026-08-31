@@ -35,3 +35,10 @@ The app expects `IMDB Dataset.csv` and `emotion_labels.csv` in the same folder. 
 ## Tech stack
 
 Python, scikit-learn, Streamlit, Hugging Face Transformers (DistilBERT), NLTK, pandas, matplotlib/seaborn, WordCloud.
+
+## Contributors
+
+- Luqman
+- Farhan
+- Shammir
+- Irfan
