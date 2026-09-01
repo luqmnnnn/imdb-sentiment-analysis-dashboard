@@ -407,6 +407,21 @@ st.markdown(
         letter-spacing: 0.1px;
     }
 
+    .presenter-badge {
+        display: inline-block;
+        background: #3E2B1E;
+        color: #F4C97A !important;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        vertical-align: middle;
+        margin-left: 0.6rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
     .stAlert p, .stAlert div, .stAlert span {
         color: #3E2B1E !important;
         font-family: 'Poppins', sans-serif !important;
@@ -425,20 +440,27 @@ st.markdown(
 # ─────────────────────────────────────────────────────────────
 # PAGE HEADER HELPER
 # ─────────────────────────────────────────────────────────────
-def page_header(title, subtitle=""):
+def page_header(title, subtitle="", presenter=""):
     sub_html = f'<div class="ph-sub">{subtitle}</div>' if subtitle else ""
+    badge_html = f'<span class="presenter-badge">🎤 {presenter}</span>' if presenter else ""
     st.markdown(
         f"""
         <div class="page-header">
             <div class="page-header-bar"></div>
             <div>
-                <h1>{title}</h1>
+                <h1>{title} {badge_html}</h1>
                 {sub_html}
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+
+def presenter_note(name, focus=""):
+    """Inline hint for pages/sections shared by multiple presenters."""
+    label = f"🎤 {name}" + (f" — {focus}" if focus else "")
+    st.markdown(f'<span class="presenter-badge">{label}</span>', unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -629,6 +651,19 @@ with st.sidebar:
             <strong>Dataset</strong><br><span style="color:#E9E3DD;">IMDB 50K Movie Reviews</span><br>
             <strong>Models</strong><br><span style="color:#E9E3DD;">RF, KNN, SVM, AdaBoost, DistilBERT</span>
         </div>
+        <hr style="border-color:rgba(196,168,130,0.18);margin:0.8rem 0 0.6rem;">
+        <div style="font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;
+                    color:#9C8475;font-weight:600;margin-bottom:0.5rem;
+                    font-family:'Poppins',sans-serif;">
+            Speaking Order
+        </div>
+        <div style="font-size:0.82rem;color:#E9E3DD;line-height:2.0;
+                    font-family:'Poppins',sans-serif;">
+            <b style="color:#D97706;">1.</b> Luqman — Home, Dataset, Preprocessing<br>
+            <b style="color:#D97706;">2.</b> Irfan — Classification (intro), DistilBERT<br>
+            <b style="color:#D97706;">3.</b> Shammir — ROC-AUC, CV, SVM words<br>
+            <b style="color:#D97706;">4.</b> Farhan — Emotion, Conclusion<br>
+        </div>
         """,
         unsafe_allow_html=True,
     )
@@ -649,6 +684,7 @@ if page == "Home":
     page_header(
         "Movie Review Sentiment Analysis",
         "TF-IDF classical models benchmarked against a pretrained DistilBERT",
+        presenter="Luqman opens here",
     )
 
     st.markdown("### About this Dashboard")
@@ -694,7 +730,7 @@ if page == "Home":
 # MODULE 2 — DATASET OVERVIEW
 # ============================================================
 elif page == "Dataset Overview":
-    page_header("Dataset Overview", "Raw data, class balance, and review length")
+    page_header("Dataset Overview", "Raw data, class balance, and review length", presenter="Luqman")
 
     if not data_loaded:
         st.error("Dataset not found. Place the CSV next to app.py.")
@@ -741,7 +777,7 @@ elif page == "Dataset Overview":
 # MODULE 3 — PREPROCESSING & TF-IDF
 # ============================================================
 elif page == "Preprocessing & TF-IDF":
-    page_header("Preprocessing & TF-IDF", "Text cleaning pipeline and top TF-IDF terms")
+    page_header("Preprocessing & TF-IDF", "Text cleaning pipeline and top TF-IDF terms", presenter="Luqman")
 
     if not data_loaded:
         st.error("Dataset not found.")
@@ -817,7 +853,11 @@ elif page == "Preprocessing & TF-IDF":
 # MODULE 4 — CLASSIFICATION ANALYSIS
 # ============================================================
 elif page == "Classification Analysis":
-    page_header("Classification Analysis", "Random Forest, KNN, SVM and AdaBoost on TF-IDF vectors")
+    page_header(
+        "Classification Analysis",
+        "Random Forest, KNN, SVM and AdaBoost on TF-IDF vectors",
+        presenter="Irfan, then Shammir",
+    )
 
     if not data_loaded:
         st.error("Dataset not found.")
@@ -826,6 +866,7 @@ elif page == "Classification Analysis":
     bundle = train_models(path, sample_size)
     scores, preds, y_test = bundle["scores"], bundle["preds"], bundle["y_test"]
 
+    presenter_note("Irfan", "baseline accuracy & confusion matrix")
     st.markdown("### Accuracy Comparison")
     cols = st.columns(len(scores))
     best_model = max(scores, key=scores.get)
@@ -862,6 +903,7 @@ elif page == "Classification Analysis":
         "if one type of mistake matters more in a real application than the other."
     )
 
+    presenter_note("Shammir", "ROC-AUC, CV & SVM coefficients from here")
     st.markdown("### ROC-AUC Curves")
     fig2, ax2 = plt.subplots(figsize=(7, 6))
     auc_scores = {}
@@ -940,7 +982,11 @@ elif page == "Classification Analysis":
 # MODULE 5 — DISTILBERT BENCHMARK
 # ============================================================
 elif page == "DistilBERT Benchmark":
-    page_header("DistilBERT Benchmark", "Pretrained transformer, zero training, run on a small sample")
+    page_header(
+        "DistilBERT Benchmark",
+        "Pretrained transformer, zero training, run on a small sample",
+        presenter="Irfan",
+    )
 
     if not data_loaded:
         st.error("Dataset not found.")
@@ -1015,7 +1061,11 @@ elif page == "DistilBERT Benchmark":
 # MODULE 6 — EMOTION CLASSIFICATION
 # ============================================================
 elif page == "Emotion Classification":
-    page_header("Emotion Classification", "Seven-way emotion labels instead of two polarities")
+    page_header(
+        "Emotion Classification",
+        "Seven-way emotion labels instead of two polarities",
+        presenter="Farhan",
+    )
 
     if not data_loaded:
         st.error("Dataset not found.")
@@ -1155,7 +1205,7 @@ elif page == "Try It Yourself":
 # MODULE 8 — CONCLUSION
 # ============================================================
 elif page == "Conclusion":
-    page_header("Conclusion", "Summary of findings from the notebook")
+    page_header("Conclusion", "Summary of findings from the notebook", presenter="Farhan closes")
 
     st.markdown("### Key Findings")
     st.markdown("""
