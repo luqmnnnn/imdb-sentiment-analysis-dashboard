@@ -1260,3 +1260,44 @@ elif page == "Conclusion":
         "seconds and its coefficients name the exact words driving each prediction. For the best raw accuracy, and "
         "when latency and compute budget allow it, a pretrained transformer like DistilBERT wins with zero training."
     )
+
+    st.markdown("### Sources & References")
+    st.markdown(
+        """
+1. Maas, A. L., Daly, R. E., Pham, P. T., Huang, D., Ng, A. Y., & Potts, C. (2011).
+   **Learning Word Vectors for Sentiment Analysis.** *Proceedings of the 49th Annual Meeting of the
+   Association for Computational Linguistics (ACL 2011)*, 142–150. Stanford AI Lab —
+   [ai.stanford.edu/~amaas/data/sentiment](https://ai.stanford.edu/~amaas/data/sentiment/)
+   *(original source of the IMDB 50K movie review dataset used throughout this app)*
+
+2. Sanh, V., Debut, L., Chaumond, J., & Wolf, T. (2019).
+   **DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter.**
+   *arXiv:1910.01108*. [arxiv.org/abs/1910.01108](https://arxiv.org/abs/1910.01108)
+   *(architecture behind the `distilbert-base-uncased-finetuned-sst-2-english` benchmark model)*
+
+3. Hartmann, J. (2022). **Emotion English DistilRoBERTa-base** [Model].
+   Hugging Face. [huggingface.co/j-hartmann/emotion-english-distilroberta-base](https://huggingface.co/j-hartmann/emotion-english-distilroberta-base)
+   *(source of the silver emotion labels used for the seven-way emotion classification task)*
+
+4. Salton, G., & Buckley, C. (1988). **Term-weighting approaches in automatic text retrieval.**
+   *Information Processing & Management, 24*(5), 513–523.
+   *(foundational paper behind the TF-IDF weighting scheme used for feature extraction)*
+
+5. Cortes, C., & Vapnik, V. (1995). **Support-vector networks.** *Machine Learning, 20*(3), 273–297.
+   *(theoretical basis for the linear SVM classifier used in this project)*
+
+6. Pedregosa, F., et al. (2011). **Scikit-learn: Machine Learning in Python.**
+   *Journal of Machine Learning Research, 12*, 2825–2830. [scikit-learn.org](https://scikit-learn.org/)
+   *(library used for TF-IDF vectorization, all four classical models, and evaluation metrics)*
+
+7. Wolf, T., et al. (2020). **Transformers: State-of-the-Art Natural Language Processing.**
+   *Proceedings of EMNLP 2020: System Demonstrations*, 38–45. Hugging Face.
+   [huggingface.co/docs/transformers](https://huggingface.co/docs/transformers)
+   *(library used to run the DistilBERT and emotion-labeling pipelines)*
+        """
+    )
+    st.caption(
+        "Dataset and pretrained models are used as published by their original authors; no claims are made "
+        "beyond what each source documents. Accuracy figures quoted in this app come from our own runs on "
+        "the sampled subsets described on each page, not from the cited papers."
+    )
