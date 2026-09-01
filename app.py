@@ -1175,6 +1175,14 @@ elif page == "Try It Yourself":
                 f'<div class="lbl">Confidence {result["score"]:.1%}</div></div>',
                 unsafe_allow_html=True,
             )
+            st.caption(
+                "**Analysis:** DistilBERT reads your text token by token through self-attention, builds a "
+                "vector representation of the whole sentence, and passes it through a classification head "
+                "trained on the SST-2 sentiment dataset. The output is a softmax probability over "
+                "{negative, positive}; \"Confidence\" is just the probability of the winning class, so "
+                f"{result['score']:.1%} means the model put {result['score']:.1%} of its total probability "
+                "mass on that label. No TF-IDF or manual features are involved here, unlike the classical models."
+            )
         else:
             bundle = train_models(path, sample_size)
             vec = bundle["vectorizer"]
@@ -1199,6 +1207,30 @@ elif page == "Try It Yourself":
                 f'<div class="lbl">{model_choice} · {conf_str}</div></div>',
                 unsafe_allow_html=True,
             )
+
+            pipeline_note = (
+                "Your text goes through the same cleaning pipeline as training (lowercased, stopwords "
+                "removed, lemmatized), then the fitted TF-IDF vectorizer turns it into a 5,000-dimensional "
+                f"sparse vector of word/bigram weights. That vector is fed into the trained {model_choice} "
+                "model, which outputs the label above."
+            )
+            if hasattr(model, "predict_proba"):
+                score_note = (
+                    f"**{conf_str}** is the model's predicted probability for the winning class, "
+                    f"{'from the fraction of the k nearest training reviews that voted for it' if model_choice == 'KNN' else 'from the fraction of trees/estimators voting for it'}. "
+                    "1.0 would mean total agreement across the underlying voters; closer to 0.5 means it was a close call."
+                )
+            else:
+                sign_word = "positive" if margin > 0 else "negative"
+                score_note = (
+                    f"**Margin** ({margin:+.2f}) is how far your review's vector lands from the model's decision "
+                    "boundary (the hyperplane LinearSVC learned to separate positive from negative reviews). It "
+                    f"has no upper bound: the sign says which side of the boundary you're on (here, {sign_word}, "
+                    f"matching the **{label}** prediction), and the magnitude says how far from the boundary you "
+                    "are, i.e. how confidently the model separates this review from a toss-up case. It's a "
+                    "distance, not a probability."
+                )
+            st.caption(f"**Analysis:** {pipeline_note} {score_note}")
 
 
 # ============================================================
