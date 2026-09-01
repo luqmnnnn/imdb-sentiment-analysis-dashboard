@@ -1273,7 +1273,8 @@ elif page == "Conclusion":
 2. Sanh, V., Debut, L., Chaumond, J., & Wolf, T. (2019).
    **DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter.**
    *arXiv:1910.01108*. [arxiv.org/abs/1910.01108](https://arxiv.org/abs/1910.01108)
-   *(architecture behind the `distilbert-base-uncased-finetuned-sst-2-english` benchmark model)*
+   — model checkpoint: [huggingface.co/distilbert-base-uncased-finetuned-sst-2-english](https://huggingface.co/distilbert-base-uncased-finetuned-sst-2-english)
+   *(architecture and exact fine-tuned checkpoint used for the zero-shot DistilBERT benchmark)*
 
 3. Hartmann, J. (2022). **Emotion English DistilRoBERTa-base** [Model].
    Hugging Face. [huggingface.co/j-hartmann/emotion-english-distilroberta-base](https://huggingface.co/j-hartmann/emotion-english-distilroberta-base)
