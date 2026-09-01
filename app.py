@@ -1281,9 +1281,11 @@ elif page == "Conclusion":
 
 4. Salton, G., & Buckley, C. (1988). **Term-weighting approaches in automatic text retrieval.**
    *Information Processing & Management, 24*(5), 513–523.
+   [doi.org/10.1016/0306-4573(88)90021-0](https://doi.org/10.1016/0306-4573%2888%2990021-0)
    *(foundational paper behind the TF-IDF weighting scheme used for feature extraction)*
 
 5. Cortes, C., & Vapnik, V. (1995). **Support-vector networks.** *Machine Learning, 20*(3), 273–297.
+   [doi.org/10.1007/BF00994018](https://doi.org/10.1007/BF00994018)
    *(theoretical basis for the linear SVM classifier used in this project)*
 
 6. Pedregosa, F., et al. (2011). **Scikit-learn: Machine Learning in Python.**
