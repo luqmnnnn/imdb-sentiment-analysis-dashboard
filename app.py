@@ -684,7 +684,7 @@ if page == "Home":
     page_header(
         "Movie Review Sentiment Analysis",
         "TF-IDF classical models benchmarked against a pretrained DistilBERT",
-        presenter="Luqman opens here",
+        presenter="Luqman",
     )
 
     st.markdown("### About this Dashboard")
