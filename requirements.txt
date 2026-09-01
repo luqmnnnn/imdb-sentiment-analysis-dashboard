@@ -7,4 +7,5 @@ seaborn
 wordcloud
 nltk
 torch
+torchvision
 transformers
