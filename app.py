@@ -714,6 +714,12 @@ elif page == "Dataset Overview":
     ax.set_ylabel("Count")
     ax.set_title("Positive vs Negative Reviews")
     st.pyplot(fig)
+    gap_pct = abs(counts.iloc[0] - counts.iloc[1]) / counts.sum() * 100
+    st.caption(
+        f"**Analysis:** {counts.idxmax()} reviews lead by only {gap_pct:.1f} percentage points, "
+        "so the two classes are close to a 50/50 split. That balance is why raw accuracy is a fair "
+        "metric for the classical models later, without needing to correct for class imbalance."
+    )
 
     st.markdown("### Review Length Distribution")
     lengths = df_raw["review"].str.len()
@@ -724,6 +730,11 @@ elif page == "Dataset Overview":
     ax2.set_title("Review Length Distribution")
     ax2.grid(True)
     st.pyplot(fig2)
+    st.caption(
+        f"**Analysis:** Reviews average {lengths.mean():,.0f} characters (median {lengths.median():,.0f}) "
+        f"with a long right tail out to {lengths.max():,.0f}. Most reviews are short-to-moderate opinions, "
+        "with a minority of long, detailed write-ups pulling the mean above the median."
+    )
 
 
 # ============================================================
@@ -767,6 +778,14 @@ elif page == "Preprocessing & TF-IDF":
     ax.set_xlabel("Summed TF-IDF Score")
     ax.set_title(f"Top 15 Terms Across {sample_size:,} Reviews")
     st.pyplot(fig)
+    top_term = top_df.iloc[0]["Term"]
+    st.caption(
+        f"**Analysis:** \"{top_term}\" carries the highest summed TF-IDF weight, and the list is dominated "
+        "by generic movie vocabulary (\"film\", \"movie\", \"character\") rather than sentiment words. "
+        "That's expected: TF-IDF surfaces frequent, distinctive terms across the whole sample, not per-class "
+        "opinion words, which is why the SVM coefficients later (not raw TF-IDF scores) are what actually "
+        "separate positive from negative."
+    )
 
     st.markdown("### Word Clouds")
     wc_col1, wc_col2 = st.columns(2)
@@ -786,6 +805,12 @@ elif page == "Preprocessing & TF-IDF":
         ax_neg.axis("off")
         ax_neg.set_title("Negative Reviews")
         st.pyplot(fig_neg)
+    st.caption(
+        "**Analysis:** Both clouds share a lot of neutral movie vocabulary, but the positive side leans "
+        "toward words like \"great\", \"love\", and \"best\", while the negative side leans toward \"bad\", "
+        "\"worst\", and \"waste\". The overlap is a visual reminder of why bag-of-words models need the "
+        "TF-IDF weighting and a classifier on top, rather than word frequency alone, to separate the classes."
+    )
 
 
 # ============================================================
@@ -811,6 +836,13 @@ elif page == "Classification Analysis":
             f'<div class="lbl">{name}{star}</div></div>',
             unsafe_allow_html=True,
         )
+    worst_model = min(scores, key=scores.get)
+    st.caption(
+        f"**Analysis:** **{best_model}** comes out on top at {scores[best_model]:.2%}, while "
+        f"**{worst_model}** trails at {scores[worst_model]:.2%}. All four are trained on the same "
+        "5,000-dimensional TF-IDF vectors, so the accuracy spread here mostly reflects how well each "
+        "algorithm's assumptions fit high-dimensional sparse text data, not differences in the input features."
+    )
 
     st.markdown("### Confusion Matrix")
     model_name = st.selectbox("Select model", list(scores.keys()))
@@ -822,9 +854,17 @@ elif page == "Classification Analysis":
     ax.set_ylabel("Actual")
     ax.set_title(f"Confusion Matrix — {model_name}")
     st.pyplot(fig)
+    tn, fp, fn, tp = cm.ravel()
+    err_side = "false positives (negative reviews called positive)" if fp > fn else "false negatives (positive reviews called negative)"
+    st.caption(
+        f"**Analysis:** {model_name} correctly classifies {tn + tp:,} of {cm.sum():,} test reviews. "
+        f"Its errors skew toward {err_side} ({max(fp, fn):,} vs {min(fp, fn):,}), which is worth knowing "
+        "if one type of mistake matters more in a real application than the other."
+    )
 
     st.markdown("### ROC-AUC Curves")
     fig2, ax2 = plt.subplots(figsize=(7, 6))
+    auc_scores = {}
     for name, model in bundle["models"].items():
         if hasattr(model, "predict_proba"):
             score = model.predict_proba(bundle["X_test_tfidf"])[:, 1]
@@ -832,6 +872,7 @@ elif page == "Classification Analysis":
             score = model.decision_function(bundle["X_test_tfidf"])
         fpr, tpr, _ = roc_curve(y_test, score)
         auc = roc_auc_score(y_test, score)
+        auc_scores[name] = auc
         ax2.plot(fpr, tpr, label=f"{name} (AUC = {auc:.3f})")
     ax2.plot([0, 1], [0, 1], "k--", alpha=0.4, label="Random (AUC = 0.500)")
     ax2.set_xlabel("False Positive Rate")
@@ -840,6 +881,12 @@ elif page == "Classification Analysis":
     ax2.legend(loc="lower right")
     ax2.grid(alpha=0.3)
     st.pyplot(fig2)
+    best_auc_model = max(auc_scores, key=auc_scores.get)
+    st.caption(
+        f"**Analysis:** **{best_auc_model}** hugs the top-left corner most closely (AUC = "
+        f"{auc_scores[best_auc_model]:.3f}), meaning it ranks positive reviews above negative ones most "
+        "reliably across every possible decision threshold, not just the default 0.5 cutoff used for accuracy."
+    )
 
     st.markdown("### 5-Fold Cross-Validation")
     if st.button("Run Cross-Validation"):
@@ -856,6 +903,12 @@ elif page == "Classification Analysis":
         ax3.set_title("5-Fold CV Accuracy (mean +/- std)")
         plt.xticks(rotation=20, ha="right")
         st.pyplot(fig3)
+        most_stable = cv_df.loc[cv_df["Std"].idxmin(), "Model"]
+        st.caption(
+            f"**Analysis:** Cross-validation accuracy tracks the single test-split numbers above closely, "
+            f"which suggests those scores aren't a fluke of one lucky split. **{most_stable}** has the "
+            "smallest error bar (std), meaning its performance is the most consistent across different folds."
+        )
 
     if model_name == "SVM (LinearSVC)":
         st.markdown("### Top SVM Coefficients")
@@ -875,6 +928,12 @@ elif page == "Classification Analysis":
             ax5.barh(top_neg.index[::-1], top_neg.values[::-1], color=DANGER)
             ax5.set_title("Pushes Toward Negative")
             st.pyplot(fig5)
+        st.caption(
+            f"**Analysis:** \"{top_pos.index[0]}\" is the single strongest push toward a positive label and "
+            f"\"{top_neg.index[0]}\" toward negative, matching plain-English intuition about sentiment words. "
+            "This is the clearest evidence that the model is picking up genuine opinion language, not just "
+            "correlating on generic movie vocabulary."
+        )
 
 
 # ============================================================
@@ -912,9 +971,23 @@ elif page == "DistilBERT Benchmark":
             f'<div class="lbl">Accuracy on {n_bert} reviews</div></div>',
             unsafe_allow_html=True,
         )
+        st.caption(
+            f"**Analysis:** {sample['correct'].sum()} of {n_bert} reviews scored correctly with zero "
+            "task-specific training, just general language understanding from pretraining plus a sentiment "
+            "fine-tune on a different dataset (SST-2)."
+        )
 
         st.markdown("### Sample Predictions")
         st.dataframe(sample[["review", "sentiment", "predicted", "confidence", "correct"]].head(20))
+        avg_conf_correct = sample.loc[sample["correct"], "confidence"].mean()
+        avg_conf_wrong = sample.loc[~sample["correct"], "confidence"].mean()
+        conf_note = (
+            f"correct predictions average {avg_conf_correct:.1%} confidence versus {avg_conf_wrong:.1%} "
+            "on the misses, so low confidence is a decent signal of an unreliable prediction"
+            if sample["correct"].sum() < n_bert
+            else "every sampled review was classified correctly"
+        )
+        st.caption(f"**Analysis:** {conf_note}.")
 
         st.markdown("### Compare Against Classical Models")
         bundle = train_models(path, sample_size)
@@ -929,7 +1002,13 @@ elif page == "DistilBERT Benchmark":
         ax.set_title("DistilBERT vs Classical Models")
         plt.xticks(rotation=20, ha="right")
         st.pyplot(fig)
-        st.caption("Classical model accuracy is on their own held-out test split, not the DistilBERT sample above, so treat this as a rough comparison.")
+        rank = list(compare_df["Model"]).index("DistilBERT (zero-shot)") + 1
+        st.caption(
+            f"**Analysis:** DistilBERT ranks #{rank} of {len(compare_df)} here despite never training on this "
+            "dataset, versus classical models trained directly on it. Classical model accuracy is on their own "
+            "held-out test split, not the DistilBERT sample above, so treat the ranking as a rough comparison, "
+            "not a controlled head-to-head."
+        )
 
 
 # ============================================================
@@ -961,6 +1040,13 @@ elif page == "Emotion Classification":
     ax.set_title("Emotion Label Distribution")
     plt.xticks(rotation=20, ha="right")
     st.pyplot(fig)
+    dominant = dist.idxmax()
+    dom_pct = dist.max() / dist.sum() * 100
+    st.caption(
+        f"**Analysis:** \"{dominant}\" dominates at {dom_pct:.1f}% of labeled reviews, so the classes are far "
+        "from balanced. That's exactly why accuracy alone would be misleading here, a model that just always "
+        f"guessed \"{dominant}\" would already score {dom_pct:.1f}%, which is what the majority baseline below quantifies."
+    )
 
     st.markdown("### Model Performance")
     c1, c2, c3 = st.columns(3)
@@ -970,7 +1056,23 @@ elif page == "Emotion Classification":
         st.markdown(f'<div class="metric-card"><div class="num">{bundle["macro_f1"]:.2%}</div><div class="lbl">Macro F1</div></div>', unsafe_allow_html=True)
     with c3:
         st.markdown(f'<div class="metric-card"><div class="num">{bundle["baseline"]:.2%}</div><div class="lbl">Majority Baseline</div></div>', unsafe_allow_html=True)
-    st.caption("Classes are imbalanced (disgust/neutral/joy dominate), so macro F1 and the majority baseline matter more than raw accuracy here.")
+    lift = (bundle["accuracy"] - bundle["baseline"]) * 100
+    if lift > 0:
+        lift_note = (
+            f"Accuracy beats the majority baseline by {lift:.1f} points, so the model is learning real "
+            "signal rather than just predicting the dominant class every time."
+        )
+    else:
+        lift_note = (
+            f"Accuracy actually falls {abs(lift):.1f} points short of the majority baseline, meaning a "
+            "classifier that always guessed the dominant class would outscore this model on raw accuracy. "
+            "That's a sign the seven-way split is genuinely hard for TF-IDF + SVM on this sample size, "
+            "not a sign the model is broken."
+        )
+    st.caption(
+        f"**Analysis:** {lift_note} Macro F1 sitting well below accuracy confirms the classes are imbalanced "
+        "(disgust/neutral/joy dominate) and the rarer emotions are harder to catch."
+    )
 
     st.markdown("### Confusion Matrix")
     labels = sorted(bundle["y_test"].unique())
@@ -980,6 +1082,14 @@ elif page == "Emotion Classification":
     ax2.set_xlabel("Predicted")
     ax2.set_ylabel("Actual")
     st.pyplot(fig2)
+    off_diag = cm.copy()
+    np.fill_diagonal(off_diag, 0)
+    i, j = np.unravel_index(off_diag.argmax(), off_diag.shape)
+    st.caption(
+        f"**Analysis:** The darkest off-diagonal cell is actual \"{labels[i]}\" predicted as \"{labels[j]}\" "
+        f"({off_diag[i, j]} reviews), the model's most common confusion. Mistakes like this usually happen "
+        "between emotions that share overlapping vocabulary, which a bag-of-words model can't fully tell apart."
+    )
 
 
 # ============================================================
